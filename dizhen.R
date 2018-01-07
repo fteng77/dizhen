@@ -51,3 +51,19 @@ key<-c("8c0671ce17604a6f3e22a2daa81d9aad",
        "66279873dfd26bcb159007c253565590",
        "c8eb8d2bb7394d904eb95369dec4aefd",
        "1dc9410699af52908b478ac97495351d")
+jingqu<-paste(110200:110209,collapse = "|")
+zhuzhai<-paste(120300:120304,collapse="|")
+
+gaode<-function(dizhen,key,type,banjing=3000){
+  jingdu<-dizhen$jingdu
+  weidu<-dizhen$weidu
+  url<-paste("http://restapi.amap.com/v3/geocode/regeo?key=",key,"&location=",jingdu,",",weidu,
+             "&poitype=",type,"&radius=",banjing,"&extensions=all&batch=false&roadlevel=0",sep="")
+  url_string<-unlist(lapply(url,URLencode,reserved=F))
+  #connect<-unlist(lapply(url_string,url))
+  
+  geo<-fromJSON(paste(readLines(connect,warn = F), collapse = ""))
+}
+
+
+
