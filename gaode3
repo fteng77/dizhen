@@ -1,0 +1,123 @@
+################
+#1.数据预处理
+################
+
+# 读取数据
+rm(list=ls())
+wd0<-getwd()
+setwd("D:/dizhen")
+dizhen<-read.csv("dizhen.csv",stringsAsFactors = F)
+dizhen<-dizhen[,-1]
+
+#分组
+x<-list()
+nd<-5000
+d<-nrow(dizhen)%/%nd
+for (i in 1:d) x[[i]]<-dizhen[((i-1)*nd+1):(i*nd),]
+x[[d+1]]<-dizhen[(d*nd+1):nrow(dizhen),]
+y<-paste("dizhen",1:(d+1),".csv",sep="")
+for (i in 1:(d+1)) write.csv(x[[i]],y[i])
+
+#清除所有变量，重新来过
+rm(dizhen,x)
+
+##############
+#2.收集数据
+##############
+# 载入需要的包
+# library(XML)
+# library(xml2)
+# library(rvest)
+library(rjson)
+library(bitops)
+library(RCurl)
+library(tidyverse)
+library(sp)
+library(rgeos)
+library(maptools)
+
+#输入高德地图的key
+key<-c("8c0671ce17604a6f3e22a2daa81d9aad",
+       "15d13f0776ad866fdf643414ef8adbfb")
+jingqu<-paste(110200:110209,collapse = "|")
+zhuzhai<-paste(120300:120304,collapse="|")
+
+#定义函数
+gaode<-function(dizhen,key,type,banjing=3000){
+  jingdu<-dizhen$jingdu
+  weidu<-dizhen$weidu
+  url<-paste("http://restapi.amap.com/v3/geocode/regeo?key=",key,"&location=",jingdu,",",weidu,
+             "&poitype=",type,"&radius=",banjing,"&extensions=all&batch=false&roadlevel=0",sep="")
+  #url_string<-unlist(lapply(url,URLencode,reserved=F))
+  return(url)
+}
+# yxdq0<-list()
+# dizhen0<-list()
+# dizhen0<-as.data.frame(matrix(NA,ncol=14))
+
+# d3<-d+1
+d3 <- 2
+dd<-2
+#for(dd in 1:d3){
+  
+  dizhen<-read.csv(y[dd],stringsAsFactors = F)
+  #dizhen0<-vector()
+  dizhen<-dizhen[,-1]
+  dizhen0<-as.data.frame(matrix(NA,ncol=14))
+  m<-nrow(dizhen)
+  key0<-ifelse( dd%%2 == 1,key[1],key[2])
+  gd.url<-gaode(dizhen,key0,type=jingqu)
+  yxdq<-c()
+  #didian<-c()
+  
+  #循环赋值
+  for(i in 1:m){
+    url_string <- URLencode(gd.url[i])
+    connect <- url(url_string)
+    
+    #读取json数据
+    geo <- fromJSON(paste(readLines(connect,warn = F), collapse = ""))
+    
+    #读取并保存位置数据
+    sheng<-as.character(geo$regeocode$addressComponent$province)
+    shi<-as.character(geo$regeocode$addressComponent$city)
+    qu<-as.character(geo$regeocode$addressComponent$district)
+    #jiedao<-ifelse(geo$regeocode$addressComponent$township==" ",NA,geo$regeocode$addressComponent$township)
+    fujin<-as.numeric(length(geo$regeocode$pois))
+    didian<-c(dizhen[i,],sheng,shi,qu,fujin)
+    dizhen0<-rbind(dizhen0,didian)
+    #读取并保存poi数据
+    distance<-c()
+    jingdu1<-c()
+    weidu1<-c()
+    mingzi<-c()
+    
+    if(fujin > 0) {
+      for(j in 1:fujin){
+        distance<-c(distance,as.numeric(geo$regeocode$pois[[j]]$distance))
+        location<-unlist(strsplit(geo$regeocode$pois[[j]]$location,","))
+        jingdu1<-c(jingdu1,location[1])
+        weidu1<-c(weidu1,location[2])
+        mingzi<-c(mingzi,geo$regeocode$pois[[j]]$name)
+      }
+      
+      x<-data.frame(dizhen=dizhen[i,],distance=distance,jingdu=jingdu1,weidu=weidu1,mingzi=mingzi)
+      yxdq<-rbind(yxdq,x)#受影响的地区
+    }
+    
+  }
+  
+  # dizhen<-cbind(dizhen,didian)
+  # yxdq0[[i]]<-yxdq
+  # dizhen0[[i]]<-dizhen
+  
+  y1<-paste("yxdq",dd,".csv",sep="")
+  y2<-paste("dizhen.new",dd,".csv",sep="")
+  
+  write.csv(dizhen0,file=y2)
+  write.csv(yxdq,y1)
+  
+  Sys.sleep(100)
+
+#}
+
