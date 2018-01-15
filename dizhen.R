@@ -46,11 +46,7 @@ write.csv(dizhen,"dizhen.csv")
 #第二部分：搜集数据
 ######################
 #输入高德地图的key
-key<-c("8c0671ce17604a6f3e22a2daa81d9aad",
-       "15d13f0776ad866fdf643414ef8adbfb",
-       "66279873dfd26bcb159007c253565590",
-       "c8eb8d2bb7394d904eb95369dec4aefd",
-       "1dc9410699af52908b478ac97495351d")
+key<-c("")
 jingqu<-paste(110200:110209,collapse = "|")
 zhuzhai<-paste(120300:120304,collapse="|")
 
