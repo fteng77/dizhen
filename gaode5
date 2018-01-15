@@ -44,7 +44,7 @@ gaode<-function(dizhen,key,type,banjing=3000){
 # d3<-d+1
 #d3 <- 2
 #dd<-2
-for(dd in 1:(d+1)){
+for(dd in 66:70){
 
 dizhen<-read.csv(y[dd],stringsAsFactors = F)
 #dizhen0<-vector()
@@ -116,9 +116,10 @@ dizhen<-cbind(dizhen,didian)
 # dizhen0[[i]]<-dizhen
 
 y1<-paste("yxdq",dd,".csv",sep="")
-write.csv(yxdq,y1)
+write.csv(yxdq,file=y1)
 y2<-paste("dizhen.new",dd,".csv",sep="")
 write.csv(dizhen,file=y2)
+
 
 Sys.sleep(10)
 
