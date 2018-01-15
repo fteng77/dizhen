@@ -15,8 +15,7 @@ library(rgeos)
 library(maptools)
 
 #输入高德地图的key
-key<-c("8c0671ce17604a6f3e22a2daa81d9aad",
-       "15d13f0776ad866fdf643414ef8adbfb")
+key<-c("")
 jingqu<-paste(110200:110209,collapse = "|")
 zhuzhai<-paste(120300:120304,collapse="|")
 
