@@ -1,0 +1,20 @@
+rm(list=ls())
+gc()
+library(tidyverse)
+
+setwd("D:/dizhen")
+dizhen<-read.csv("dizhen.new.all.csv",stringsAsFactors = F)
+dizhen<-dizhen[,c(-1,-2)]
+dizhen<-dizhen[,-c(11:14)]
+colnames(dizhen)<-c(colnames(dizhen)[1:10],"sheng","shi","qu","fujin")
+dizhen<-as_tibble(dizhen)
+dizhen<-filter(dizhen,sheng!=0,shi!=0,qu!=0)
+
+dizhen<-mutate(dizhen,fujin.1=as.numeric(fujin))
+
+n<-nrow(dizhen)
+for (i in 1:n){
+  if(is.na(dizhen$fujin.1[i])) dizhen$fujin.1[i]<-dizhen$qu[i]
+}
+
+write.csv(dizhen,"dizhen.all.new2.csv")
