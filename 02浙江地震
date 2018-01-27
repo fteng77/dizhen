@@ -1,0 +1,91 @@
+rm(list=ls())
+gc()
+
+library(rjson)
+library(bitops)
+library(RCurl)
+library(tidyverse)
+library(sp)
+library(rgeos)
+library(maptools)
+
+setwd("D:/dizhen")
+zj.dizhen<-read.csv("dizhen.zj.csv",stringsAsFactors = F)
+zj.dizhen<-zj.dizhen[,-1]
+
+#输入高德地图的key
+key<-c("8c0671ce17604a6f3e22a2daa81d9aad")
+
+jingqu<-paste(110200:110209,collapse = "|")
+dujiacun<-paste(c('080400',
+                  '080401',
+                  '080402'),collapse ="|")
+
+chanyeyuan<-120100
+louyu<-paste(120201:120203,collapse="|")
+jiudian<-paste(c(100101,
+                 100102,
+                 100103,
+                 100104,
+                 100105),collapse = "|")
+gongsi<-170100
+gongchang<-170300
+nongye<-paste(170401:170408,collapse="|")
+
+zhuzhai<-paste(120300:120304,collapse="|")
+shichang<-paste(c('060700',
+                   '060701',
+                   '060702',
+                   '060703',
+                   '060704',
+                   '060705',
+                   '060706'),collapse="|")
+shangyejie<-paste(c('061000','061001'),collapse="|")
+yiyuan<-paste0(c('090100',
+                 '090101',
+                 '090102'),collapse = "|")
+xuexiao<-paste(141201:141206,collapse = "|")
+wenhua<-paste(c(140100,
+                140200,
+                140300,
+                140400,
+                140500,
+                140600,
+                140700,
+                140800,
+                140900),collapse = "|")
+
+type<-c(jingqu,dujiacun,chanyeyuan,louyu,jiudian,gongsi,gongchang,nongye,zhuzhai,shichang,shangyejie,yiyuan,xuexiao,wenhua)
+type.name<-c('jingqu','dujiacun','chanyeyuan','louyu','jiudian','gongsi','gongchang','nongye','zhuzhai','shichang','shangyejie','yiyuan','xuexiao','wenhua')
+#定义函数
+gaode<-function(zj.dizhen,key,type,banjing=3000){
+  jingdu<-zj.dizhen$jingdu
+  weidu<-zj.dizhen$weidu
+  url<-paste("http://restapi.amap.com/v3/geocode/regeo?key=",key,"&location=",jingdu,",",weidu,
+             "&poitype=",type,"&radius=",banjing,"&extensions=all&batch=false&roadlevel=0",sep="")
+  #url_string<-unlist(lapply(url,URLencode,reserved=F))
+  return(url)
+}
+
+m<-nrow(zj.dizhen)
+gd.url<-1:m
+
+for(i in type){
+  #type0<-type[i]
+  gd.url0<-gaode(zj.dizhen,key=key,type=i)
+  n.type<-c()
+  # gd.url<-cbind(gd.url,gd.url0)
+  for(j in 1:m){
+    connect <- URLencode(gd.url0[j]) %>% url()
+    geo <- fromJSON(paste(readLines(connect,warn = F), collapse = ""))
+    fujin<-length(geo$regeocode$pois)
+    n.type<-c(n.type,fujin)
+  }
+  
+  gd.url<-cbind(gd.url,n.type)
+}
+
+zj.dizhen.fujin<-gd.url[,-1]
+colnames(zj.dizhen.fujin)<-type.name
+zj.dizhen.fujin<-cbind(zj.dizhen,zj.dizhen.fujin)
+write.csv(zj.dizhen.fujin,"zj.dizhen.fujin.csv")
