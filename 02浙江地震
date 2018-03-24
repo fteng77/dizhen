@@ -14,7 +14,7 @@ zj.dizhen<-read.csv("dizhen.zj.csv",stringsAsFactors = F)
 zj.dizhen<-zj.dizhen[,-1]
 
 #输入高德地图的key
-key<-c("8c0671ce17604a6f3e22a2daa81d9aad")
+key<-c("##0671ce17604a6f3e22a2daa81d9aad")
 
 jingqu<-paste(110200:110209,collapse = "|")
 dujiacun<-paste(c('080400',
